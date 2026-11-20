@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexiCards v3 — Liquid Glass</title>
+<style>
+:root {
+  --bg-top: #dceeff;
+  --bg-mid: #f2f8ff;
+  --bg-bot: #d5ecff;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.88);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  --glass-shadow: 0 8px 24px rgba(15, 76, 156, 0.08);
+  --ink: #0f2544;
+  --muted: #4b678a;
+  --blue: #0a74e8;
+  --blue-deep: #0656b8;
+  --blue-cyan: #22b8f0;
+  --red: #d4384c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Arial, sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(56, 182, 255, 0.28), transparent 42%),
+    radial-gradient(circle at 88% 18%, rgba(14, 116, 232, 0.18), transparent 46%),
+    radial-gradient(circle at 75% 85%, rgba(114, 214, 255, 0.30), transparent 48%),
+    linear-gradient(145deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bot) 100%);
+  overflow-x: hidden;
+}
+
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+
+/* Auth Screen */
+.auth {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.authbox {
+  width: min(445px, 100%);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  border-radius: 26px;
+  padding: 30px;
+  box-shadow: 0 16px 40px rgba(12, 74, 158, 0.11), var(--glass-highlight);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: var(--ink);
+}
+
+.logoicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--blue-cyan), var(--blue));
+  color: #fff;
+  border-radius: 13px;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(10, 116, 232, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.authbox h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 10px 0 6px;
+}
+
+.muted { color: var(--muted); }
+
+/* Form Fields */
+.field { display: grid; gap: 7px; margin: 14px 0; }
+.field label {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1c3b64;
+}
+
+.field input,
+.field textarea,
+.field select,
+#wordSearch {
+  width: 100%;
+  border: 1px solid rgba(155, 202, 255, 0.85);
+  border-radius: 13px;
+  padding: 11px 14px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  box-shadow: inset 0 1px 2px rgba(15, 76, 156, 0.05);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.field input::placeholder,
+.field textarea::placeholder,
+#wordSearch::placeholder {
+  color: #7b96b8;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+#wordSearch:focus {
+  background: #fff;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(34, 184, 240, 0.18);
+}
+
+/* Liquid Glass Buttons */
+.btn {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 13px;
+  padding: 11px 17px;
+  background: linear-gradient(135deg, #1b9cf5 0%, var(--blue) 100%);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 6px 16px rgba(10, 116, 232, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform 0.12s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 9px 20px rgba(10, 116, 232, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  filter: brightness(1.03);
+}
+
+.btn:active { transform: translateY(0); }
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  color: #133b70;
+  box-shadow: 0 3px 10px rgba(15, 76, 156, 0.06), inset 0 1px 0 #fff;
+}
+
+.btn.secondary:hover {
+  background: #fff;
+  color: var(--blue);
+}
+
+.btn.danger {
+  background: rgba(255, 236, 239, 0.86);
+  border: 1px solid rgba(255, 205, 212, 0.95);
+  color: var(--red);
+  box-shadow: 0 3px 10px rgba(212, 56, 76, 0.07);
+}
+
+.btn.danger:hover {
+  background: #ffe2e6;
+}
+
+.btn.full { width: 100%; }
+
+.switch {
+  margin-top: 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.switch a {
+  color: var(--blue);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.switch a:hover { text-decoration: underline; }
+
+.msg {
+  font-size: 13px;
+  color: var(--red);
+  min-height: 18px;
+  margin-top: 8px;
+}
+
+/* App Shell */
+.app {
+  display: none;
+  min-height: 100vh;
+}
+
+/* Floating Glass Sidebar */
+.sidebar {
+  width: 252px;
+  position: fixed;
+  inset: 16px auto 16px 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.sidebar .logo { padding: 0 10px 14px; }
+
+.nav { display: grid; gap: 6px; }
+
+.nav button {
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: #36567d;
+  font-weight: 600;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.nav button:hover {
+  background: rgba(255, 255, 255, 0.65);
+  color: var(--blue);
+}
+
+.nav button.active {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(255, 255, 255, 0.95);
+  color: var(--blue);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(10, 116, 232, 0.10), inset 0 1px 0 #fff;
+}
+
+.sidebottom {
+  margin-top: auto;
+  border-top: 1px solid rgba(145, 198, 255, 0.35);
+  padding-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sidebottom span {
+  font-weight: 600;
+  font-size: 13px;
+  padding-left: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Main Content */
+.main {
+  margin-left: 284px;
+  padding: 28px 32px 40px 16px;
+  max-width: 1520px;
+  width: 100%;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--blue-deep);
+}
+
+.top .user {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 99px;
+  padding: 9px 16px;
+  color: #244875;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(15, 76, 156, 0.06), var(--glass-highlight);
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* Glass Cards & Panels */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stat,
+.panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
+}
+
+.stat small {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 800;
+  margin-top: 8px;
+  letter-spacing: -0.02em;
+  color: var(--blue-deep);
+}
+
+.panel { margin-top: 18px; }
+.panel h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.quick { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.formgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.formgrid .field { margin: 0; }
+.wide { grid-column: 1 / -1; }
+
+.image-preview {
+  max-width: 220px;
+  max-height: 180px;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 16px rgba(15, 76, 156, 0.10);
+  object-fit: cover;
+  display: none;
+  margin-top: 10px;
+}
+
+/* Table */
+.tablewrap { overflow: auto; margin-top: 10px; }
+table { width: 100%; border-collapse: collapse; min-width: 540px; }
+
+th, td {
+  text-align: left;
+  padding: 13px 12px;
+  border-bottom: 1px solid rgba(145, 198, 255, 0.28);
+  font-size: 14px;
+}
+
+th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+tbody tr:hover { background: rgba(255, 255, 255, 0.5); }
+
+.wordimg {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  object-fit: cover;
+}
+
+.pill {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(145, 198, 255, 0.55);
+  color: #164b8a;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Flashcard */
+.flashwrap {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.flashcard {
+  margin-top: 16px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.86), rgba(232, 246, 255, 0.68));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 26px;
+  min-height: 365px;
+  padding: 28px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 14px 34px rgba(12, 82, 175, 0.11), var(--glass-highlight);
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.flashcard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(12, 82, 175, 0.15), var(--glass-highlight);
+}
+
+.flashcard img {
+  max-width: 220px;
+  max-height: 150px;
+  border-radius: 15px;
+  border: 2px solid #fff;
+  box-shadow: 0 6px 16px rgba(15, 76, 156, 0.10);
+  object-fit: cover;
+}
+
+.flashword {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 14px 0;
+  color: var(--ink);
+}
+
+.flashhint { color: var(--muted); font-size: 14px; }
+
+.flashcontrols {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+/* Quiz */
+.quizquestion {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 18px 0;
+  color: var(--ink);
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.answer {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 16px 18px;
+  text-align: left;
+  font-weight: 650;
+  color: var(--ink);
+  box-shadow: 0 3px 10px rgba(15, 76, 156, 0.05), inset 0 1px 0 #fff;
+  transition: border-color 0.14s ease, background-color 0.14s ease;
+}
+
+.answer:hover:not(:disabled) {
+  border-color: rgba(10, 116, 232, 0.55);
+  background: #fff;
+}
+
+.answer.correct {
+  background: rgba(220, 252, 235, 0.9);
+  border-color: #4cc38a;
+  color: #0b5e38;
+}
+
+.answer.wrong {
+  background: rgba(255, 228, 232, 0.9);
+  border-color: #eb8492;
+  color: #9e1c2e;
+}
+
+/* Progress Bar */
+.progress {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 99px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(15, 76, 156, 0.08);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue-cyan), var(--blue));
+  border-radius: 99px;
+  width: 0;
+  transition: width 0.2s ease;
+}
+
+.empty {
+  color: var(--muted);
+  padding: 28px;
+  text-align: center;
+}
+
+.notice {
+  background: rgba(232, 244, 255, 0.78);
+  border: 1px solid rgba(145, 198, 255, 0.65);
+  color: #1c4c85;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 16px;
+}
+
+.hidden { display: none !important; }
+
+.historyitem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(145, 198, 255, 0.28);
+  padding: 13px 4px;
+}
+.historyitem:last-child { border-bottom: 0; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  background: linear-gradient(135deg, rgba(14, 62, 132, 0.92), rgba(10, 116, 232, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  padding: 13px 18px;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 10px 24px rgba(10, 74, 160, 0.22);
+  display: none;
+  z-index: 50;
+}
+
+@media (max-width: 900px) {
+  .sidebar { width: 212px; inset: 12px auto 12px 12px; }
+  .main { margin-left: 236px; padding: 20px; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 650px) {
+  .app { flex-direction: column; }
+  .sidebar {
+    position: static;
+    width: auto;
+    inset: auto;
+    margin: 12px 12px 0;
+    border-radius: 20px;
+    display: block;
+    padding: 14px;
+  }
+  .sidebar .logo { margin-bottom: 10px; }
+  .nav { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .nav button { text-align: center; padding: 9px 5px; font-size: 12px; }
+  .sidebottom { margin-top: 12px; padding-top: 10px; }
+  .main { margin: 0; padding: 14px; }
+  .top { align-items: flex-start; flex-direction: column; }
+  .cards { gap: 10px; }
+  .stat { padding: 15px; }
+  .stat strong { font-size: 24px; }
+  .formgrid { grid-template-columns: 1fr; }
+  .wide { grid-column: auto; }
+  .flashcard { min-height: 310px; }
+  .answers { grid-template-columns: 1fr; }
+  .authbox { padding: 24px; }
+}
+</style>
+</head>
+<body>
+<section class="auth" id="auth">
+ <div class="authbox"><div class="logo"><span class="logoicon">✦</span> LexiCards <span class="pill">v3</span></div>
+  <div id="registerPane"><h1>Tạo tài khoản</h1><p class="muted">Bắt đầu xây dựng kho từ vựng của riêng bạn.</p>
+   <div class="field"><label>Tên hiển thị</label><input id="regName" placeholder="Tên của bạn" autocomplete="nickname"></div>
+   <div class="field"><label>Tên đăng nhập</label><input id="regUser" placeholder="Tạo tên đăng nhập" autocomplete="username"></div>
+   <div class="field"><label>Mật khẩu</label><input id="regPass" type="password" placeholder="Ít nhất 6 ký tự" autocomplete="new-password"></div>
+   <button class="btn full" id="registerBtn">Tạo tài khoản</button><div class="msg" id="regMsg"></div>
+   <div class="switch">Đã có tài khoản? <a id="toLogin">Đăng nhập</a></div>
+  </div>
+  <div id="loginPane" class="hidden"><h1>Đăng nhập</h1><p class="muted">Tiếp tục buổi học của bạn.</p>
+   <div class="field"><label>Tên đăng nhập</label><input id="loginUser" autocomplete="username"></div>
+   <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" autocomplete="current-password"></div>
+   <button class="btn full" id="loginBtn">Đăng nhập</button><div class="msg" id="loginMsg"></div>
+   <div class="switch">Chưa có tài khoản? <a id="toRegister">Tạo tài khoản</a></div>
+  </div><div class="notice">Phiên bản v3 lưu tài khoản và dữ liệu trên trình duyệt hiện tại. Đây không phải hệ thống tài khoản online và không đồng bộ thiết bị.</div>
+ </div>
+</section>
+<div class="app" id="app">
+ <aside class="sidebar"><div class="logo"><span class="logoicon">✦</span> LexiCards <span class="pill">v3</span></div>
+  <nav class="nav"><button data-view="dashboard" class="active">▦　Tổng quan</button><button data-view="add">＋　Thêm từ</button><button data-view="words">▤　Kho từ vựng</button><button data-view="study">▱　Flashcard</button><button data-view="quiz">✓　Quiz</button><button data-view="history">◷　Lịch sử học</button></nav>
+  <div class="sidebottom"><span id="sideUser" class="muted"></span><button class="btn secondary" id="logoutBtn">Đăng xuất</button></div>
+ </aside>
+ <main class="main"><div class="top"><h1 id="pageTitle">Tổng quan</h1><span class="user" id="welcomeUser">Xin chào</span></div>
+ <section class="view active" id="dashboard"><div class="cards"><div class="stat"><small>Tổng từ vựng</small><strong id="statWords">0</strong></div><div class="stat"><small>Đã nhớ</small><strong id="statKnown">0</strong></div><div class="stat"><small>Cần ôn</small><strong id="statReview">0</strong></div><div class="stat"><small>Buổi học</small><strong id="statSessions">0</strong></div></div>
+  <div class="panel"><h2>Bắt đầu học</h2><div class="quick"><button class="btn" data-goto="study">Học Flashcard</button><button class="btn secondary" data-goto="quiz">Làm Quiz</button><button class="btn secondary" data-goto="add">＋ Thêm từ mới</button></div></div><div class="panel"><h2>Tiến độ ghi nhớ</h2><div class="progress"><span id="dashProgress"></span></div><p class="muted" id="progressText">Thêm từ vựng để bắt đầu theo dõi.</p></div></section>
+ <section class="view" id="add"><div class="panel"><h2>Thêm từ vựng mới</h2><form id="wordForm"><div class="formgrid"><div class="field"><label>Tiếng Anh *</label><input id="english" required placeholder="e.g. environment"></div><div class="field"><label>Nghĩa tiếng Việt *</label><input id="vietnamese" required placeholder="e.g. môi trường"></div><div class="field"><label>Phiên âm (không bắt buộc)</label><input id="ipa" placeholder="/ɪnˈvaɪrənmənt/"></div><div class="field"><label>Chủ đề</label><input id="topic" placeholder="Nature, School, Technology..."></div><div class="field wide"><label>Câu ví dụ</label><textarea id="example" rows="2" placeholder="Write an example sentence..."></textarea></div><div class="field wide"><label>Ảnh minh họa</label><input type="file" id="imageInput" accept="image/*"><img id="imagePreview" class="image-preview" alt="Ảnh xem trước"></div></div><button class="btn" type="submit" style="margin-top:16px">Lưu từ vựng</button> <button class="btn secondary" type="reset" id="resetWord">Làm mới</button></form></div></section>
+ <section class="view" id="words"><div class="panel"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap"><h2>Kho từ vựng</h2><input id="wordSearch" placeholder="Tìm từ..." style="max-width:260px"></div><div class="tablewrap"><table><thead><tr><th>Ảnh</th><th>English</th><th>Nghĩa</th><th>Chủ đề</th><th>Trạng thái</th><th></th></tr></thead><tbody id="wordRows"></tbody></table></div><div id="wordEmpty" class="empty">Chưa có từ nào. Hãy thêm từ đầu tiên.</div></div><div class="panel"><h2>Sao lưu dữ liệu</h2><p class="muted">Xuất dữ liệu JSON để lưu dự phòng hoặc nhập lại trên trình duyệt này.</p><button class="btn secondary" id="exportBtn">Xuất JSON</button> <label class="btn secondary" for="importFile" style="display:inline-block;cursor:pointer">Nhập JSON</label><input type="file" id="importFile" accept="application/json" class="hidden"></div></section>
+ <section class="view" id="study"><div class="flashwrap"><div class="muted" id="studyCount">Chưa có từ vựng</div><div class="panel" style="padding:12px"><div class="progress"><span id="studyProgress"></span></div></div><div class="flashcard" id="flashcard"><div class="empty">Thêm từ vựng để bắt đầu học Flashcard.</div></div><div class="flashcontrols"><button class="btn secondary" id="prevCard">← Trước</button><button class="btn secondary" id="flipCard">Lật thẻ</button><button class="btn secondary" id="nextCard">Tiếp →</button></div><div class="flashcontrols hidden" id="rateControls"><button class="btn danger" id="notKnown">Chưa nhớ</button><button class="btn" id="known">Đã nhớ</button></div></div></section>
+ <section class="view" id="quiz"><div class="panel" id="quizSetup"><h2>Kiểm tra từ vựng</h2><p class="muted">Quiz chọn nghĩa đúng trong 4 đáp án.</p><div class="field"><label>Số câu</label><select id="quizAmount"><option>5</option><option selected>10</option><option>15</option><option>20</option><option>Toàn bộ từ</option></select></div><button class="btn" id="startQuiz">Bắt đầu Quiz</button></div><div class="panel hidden" id="quizRun"><div class="muted" id="quizProgressText"></div><div class="progress"><span id="quizProgress"></span></div><div class="quizquestion" id="quizWord"></div><div class="answers" id="quizAnswers"></div><p id="quizFeedback" class="muted"></p><button class="btn secondary hidden" id="quizNext">Câu tiếp theo</button></div><div class="panel hidden" id="quizResult"><h2>Hoàn thành Quiz!</h2><p id="quizScore" class="quizquestion"></p><p id="quizResultMsg"></p><button class="btn" id="quizAgain">Làm lại</button></div></section>
+ <section class="view" id="history"><div class="panel"><h2>Lịch sử học tập</h2><div id="historyList"></div><div id="historyEmpty" class="empty">Chưa có buổi học nào được ghi nhận.</div></div></section>
+ </main></div><div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)]; const DBKEY='lexicards_v3_users'; let current=null, words=[], history=[], imageData='', studyDeck=[], studyIndex=0, flipped=false, quizDeck=[], quizIndex=0, quizCorrect=0, quizAnswered=false;
+const readUsers=()=>{try{return JSON.parse(localStorage.getItem(DBKEY)||'{}')}catch{return {}}};const saveUsers=o=>localStorage.setItem(DBKEY,JSON.stringify(o));const userKey=()=>current?.username;const wordKey=()=>`lexicards_v3_words_${userKey()}`;const histKey=()=>`lexicards_v3_history_${userKey()}`;const loadData=()=>{words=JSON.parse(localStorage.getItem(wordKey())||'[]');history=JSON.parse(localStorage.getItem(histKey())||'[]')};const saveWords=()=>localStorage.setItem(wordKey(),JSON.stringify(words));const saveHistory=()=>localStorage.setItem(histKey(),JSON.stringify(history));
+async function hash(s){try{if(crypto?.subtle&&window.isSecureContext){let b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}}catch{} return 'local-'+btoa(unescape(encodeURIComponent(s)))}
+function showToast(t){let el=$('#toast');el.textContent=t;el.style.display='block';setTimeout(()=>el.style.display='none',2400)}function authPane(login){$('#registerPane').classList.toggle('hidden',login);$('#loginPane').classList.toggle('hidden',!login)}
+$('#toLogin').onclick=()=>authPane(true);$('#toRegister').onclick=()=>authPane(false);
+$('#registerBtn').onclick=async()=>{let name=$('#regName').value.trim(),u=$('#regUser').value.trim().toLowerCase(),p=$('#regPass').value;if(!name||!u||!p){$('#regMsg').textContent='Vui lòng điền đầy đủ thông tin.';return}if(u.length<3){$('#regMsg').textContent='Tên đăng nhập phải có ít nhất 3 ký tự.';return}if(p.length<6){$('#regMsg').textContent='Mật khẩu cần ít nhất 6 ký tự.';return}let users=readUsers();if(users[u]){$('#regMsg').textContent='Tên đăng nhập đã tồn tại.';return}users[u]={name,password:await hash(p),created:Date.now()};saveUsers(users);$('#regMsg').textContent='Tạo tài khoản thành công! Hãy đăng nhập.';$('#loginUser').value=u;authPane(true)};
+$('#loginBtn').onclick=async()=>{let u=$('#loginUser').value.trim().toLowerCase(),p=$('#loginPass').value,users=readUsers();if(!u||!p){$('#loginMsg').textContent='Nhập tên đăng nhập và mật khẩu.';return}if(!users[u]||users[u].password!==await hash(p)){$('#loginMsg').textContent='Tên đăng nhập hoặc mật khẩu không đúng.';return}current={username:u,name:users[u].name};localStorage.setItem('lexicards_v3_session',u);enterApp()};$('#loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click()});
+function enterApp(){loadData();$('#auth').style.display='none';$('#app').style.display='flex';$('#welcomeUser').textContent='Xin chào, '+current.name;$('#sideUser').textContent=current.name;renderAll();go('dashboard')}function logout(){current=null;localStorage.removeItem('lexicards_v3_session');$('#app').style.display='none';$('#auth').style.display='grid';authPane(false)}$('#logoutBtn').onclick=logout;
+function go(v){$$('.view').forEach(x=>x.classList.remove('active'));$('#'+v).classList.add('active');$$('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));const titles={dashboard:'Tổng quan',add:'Thêm từ vựng',words:'Kho từ vựng',study:'Học Flashcard',quiz:'Kiểm tra Quiz',history:'Lịch sử học'};$('#pageTitle').textContent=titles[v]||v;if(v==='study')startStudy();if(v==='words')renderWords();if(v==='history')renderHistory()}
+$$('.nav button').forEach(b=>b.onclick=()=>go(b.dataset.view));$$('[data-goto]').forEach(b=>b.onclick=()=>go(b.dataset.goto));
+$('#imageInput').onchange=e=>{let f=e.target.files[0];if(!f)return;if(f.size>1.8*1024*1024){showToast('Ảnh lớn hơn 1.8MB. Vui lòng chọn ảnh nhỏ hơn.');e.target.value='';return}let r=new FileReader();r.onload=()=>{let im=new Image();im.onload=()=>{let scale=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);imageData=c.toDataURL('image/jpeg',0.76);$('#imagePreview').src=imageData;$('#imagePreview').style.display='block'};im.src=r.result};r.readAsDataURL(f)};
+$('#wordForm').onsubmit=e=>{e.preventDefault();let en=$('#english').value.trim(),vi=$('#vietnamese').value.trim();if(!en||!vi)return;let exists=words.some(w=>w.en.toLowerCase()===en.toLowerCase());if(exists){showToast('Từ này đã có trong kho.');return}words.unshift({id:crypto?.randomUUID?.()||String(Date.now()),en,vi,ipa:$('#ipa').value.trim(),topic:$('#topic').value.trim(),example:$('#example').value.trim(),img:imageData,known:false,created:Date.now(),review:0});saveWords();e.target.reset();imageData='';$('#imagePreview').style.display='none';renderAll();showToast('Đã lưu từ vựng!');};$('#resetWord').onclick=()=>{imageData='';$('#imagePreview').style.display='none'};
+function renderAll(){renderDashboard();renderWords();renderHistory()}function renderDashboard(){let known=words.filter(w=>w.known).length,review=words.length-known,sessions=history.length;$('#statWords').textContent=words.length;$('#statKnown').textContent=known;$('#statReview').textContent=review;$('#statSessions').textContent=sessions;let pct=words.length?Math.round(known/words.length*100):0;$('#dashProgress').style.width=pct+'%';$('#progressText').textContent=words.length?`${known}/${words.length} từ đã đánh dấu nhớ (${pct}%). ${review} từ còn cần ôn.`:'Thêm từ vựng để bắt đầu theo dõi.'}
+function renderWords(){let q=($('#wordSearch')?.value||'').trim().toLowerCase();let filtered=words.filter(w=>w.en.toLowerCase().includes(q)||w.vi.toLowerCase().includes(q)||(w.topic||'').toLowerCase().includes(q));$('#wordRows').innerHTML=filtered.map(w=>`<tr><td>${w.img?`<img class="wordimg" src="${w.img}" alt="">`:'—'}</td><td><strong>${esc(w.en)}</strong>${w.ipa?`<br><small class="muted">${esc(w.ipa)}</small>`:''}</td><td>${esc(w.vi)}</td><td>${w.topic?esc(w.topic):'—'}</td><td><span class="pill">${w.known?'Đã nhớ':'Cần ôn'}</span></td><td><button class="btn secondary" data-toggleknown="${w.id}">${w.known?'Bỏ nhớ':'Đánh dấu nhớ'}</button> <button class="btn danger" data-del="${w.id}">Xóa</button></td></tr>`).join('');$('#wordEmpty').style.display=filtered.length?'none':'block';$$('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('Xóa từ này khỏi kho?')){words=words.filter(w=>w.id!==b.dataset.del);saveWords();renderAll()}});$$('[data-toggleknown]').forEach(b=>b.onclick=()=>{let w=words.find(x=>x.id===b.dataset.toggleknown);if(w){w.known=!w.known;saveWords();renderAll()}})}function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}$('#wordSearch').oninput=renderWords;
+function startStudy(){studyDeck=[...words].sort((a,b)=>(a.known?1:0)-(b.known?1:0));studyIndex=0;flipped=false;renderCard()}function renderCard(){let c=$('#flashcard');$('#rateControls').classList.add('hidden');if(!studyDeck.length){c.innerHTML='<div class="empty">Kho chưa có từ vựng. Hãy vào Thêm từ để tạo thẻ.</div>';$('#studyCount').textContent='0 từ';$('#studyProgress').style.width='0%';return}if(studyIndex>=studyDeck.length){c.innerHTML=`<div><h2>Hoàn thành lượt học!</h2><p>Bạn vừa xem ${studyDeck.length} từ.</p><button class="btn" id="studyRestart">Học lại</button></div>`;$('#studyRestart').onclick=startStudy;$('#studyCount').textContent='Hoàn thành';$('#studyProgress').style.width='100%';return}let w=studyDeck[studyIndex];$('#studyCount').textContent=`Từ ${studyIndex+1}/${studyDeck.length}`;$('#studyProgress').style.width=(studyIndex/studyDeck.length*100)+'%';c.innerHTML=flipped?`<div>${w.img?`<img src="${w.img}" alt="">`:''}<div class="flashword">${esc(w.vi)}</div>${w.example?`<p>${esc(w.example)}</p>`:''}<p class="flashhint">${esc(w.en)} ${w.ipa?` · ${esc(w.ipa)}`:''}</p><span class="pill">Chạm để xem mặt trước</span></div>`:`<div>${w.img?`<img src="${w.img}" alt="">`:''}<div class="flashword">${esc(w.en)}</div>${w.ipa?`<div class="muted">${esc(w.ipa)}</div>`:''}<p class="flashhint">Chạm thẻ để lật xem nghĩa</p></div>`;c.onclick=()=>{flipped=!flipped;renderCard();if(flipped)$('#rateControls').classList.remove('hidden')}}$('#flipCard').onclick=()=>{flipped=!flipped;renderCard();if(flipped)$('#rateControls').classList.remove('hidden')};$('#nextCard').onclick=()=>{studyIndex++;flipped=false;renderCard()};$('#prevCard').onclick=()=>{studyIndex=Math.max(0,studyIndex-1);flipped=false;renderCard()};function rateWord(known){if(!studyDeck.length||studyIndex>=studyDeck.length)return;let w=words.find(x=>x.id===studyDeck[studyIndex].id);if(w){w.known=known;w.review=(w.review||0)+(known?0:1);saveWords()}studyIndex++;flipped=false;renderCard();renderDashboard()}$('#known').onclick=()=>rateWord(true);$('#notKnown').onclick=()=>rateWord(false);
+function startQuiz(){if(words.length<2){showToast('Cần ít nhất 2 từ để tạo Quiz.');return}let n=$('#quizAmount').value==='Toàn bộ từ'?words.length:Number($('#quizAmount').value);quizDeck=[...words].sort(()=>Math.random()-.5).slice(0,n);quizIndex=0;quizCorrect=0;$('#quizSetup').classList.add('hidden');$('#quizResult').classList.add('hidden');$('#quizRun').classList.remove('hidden');renderQuizQuestion()}$('#startQuiz').onclick=startQuiz;function renderQuizQuestion(){quizAnswered=false;$('#quizNext').classList.add('hidden');$('#quizFeedback').textContent='';if(quizIndex>=quizDeck.length){finishQuiz();return}let w=quizDeck[quizIndex];$('#quizProgressText').textContent=`Câu ${quizIndex+1}/${quizDeck.length}`;$('#quizProgress').style.width=(quizIndex/quizDeck.length*100)+'%';$('#quizWord').textContent=w.en;let choices=[w.vi,...words.filter(x=>x.id!==w.id).map(x=>x.vi)].sort(()=>Math.random()-.5).slice(0,3).sort(()=>Math.random()-.5);$('#quizAnswers').innerHTML=choices.map(a=>`<button class="answer">${esc(a)}</button>`).join('');$$('.answer').forEach(b=>b.onclick=()=>answerQuiz(b,w,choices))}function answerQuiz(btn,w,choices){if(quizAnswered)return;quizAnswered=true;let correct=btn.textContent===w.vi;if(correct){quizCorrect++;btn.classList.add('correct');$('#quizFeedback').textContent='Chính xác!';}else{btn.classList.add('wrong');$('#quizFeedback').textContent='Đáp án đúng: '+w.vi;$$('.answer').forEach(b=>{if(b.textContent===w.vi)b.classList.add('correct')})}$$('.answer').forEach(b=>b.disabled=true);$('#quizNext').classList.remove('hidden')}$('#quizNext').onclick=()=>{quizIndex++;renderQuizQuestion()};function finishQuiz(){let pct=Math.round(quizCorrect/quizDeck.length*100);history.unshift({type:'Quiz',date:Date.now(),total:quizDeck.length,correct:quizCorrect,pct});saveHistory();$('#quizRun').classList.add('hidden');$('#quizResult').classList.remove('hidden');$('#quizScore').textContent=`${quizCorrect}/${quizDeck.length} câu đúng · ${pct}%` ;$('#quizResultMsg').textContent=pct>=80?'Rất tốt! Tiếp tục duy trì việc ôn tập.':pct>=50?'Khá ổn, hãy ôn lại các từ chưa chắc.':'Nên quay lại Flashcard để ôn những từ này.';renderHistory()}$('#quizAgain').onclick=()=>{$('#quizResult').classList.add('hidden');$('#quizSetup').classList.remove('hidden')};
+function renderHistory(){$('#historyList').innerHTML=history.map(h=>`<div class="historyitem"><span><strong>${h.type}</strong><br><small class="muted">${new Date(h.date).toLocaleString('vi-VN')}</small></span><strong>${h.correct}/${h.total} · ${h.pct}%</strong></div>`).join('');$('#historyEmpty').style.display=history.length?'none':'block'}
+$('#exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify({words,history},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='LexiCards-backup.json';a.click();URL.revokeObjectURL(a.href)};$('#importFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(Array.isArray(d.words)){words=d.words;saveWords()}if(Array.isArray(d.history)){history=d.history;saveHistory()}renderAll();showToast('Đã nhập dữ liệu')}catch{showToast('File JSON không hợp lệ')}e.target.value=''};r.readAsText(f)};
+// Resume an existing local session, if present
+let remembered=localStorage.getItem('lexicards_v3_session'),accounts=readUsers();if(remembered&&accounts[remembered]){current={username:remembered,name:accounts[remembered].name};enterApp()}
+</script>
+</body>
+</html>
